@@ -703,7 +703,7 @@
   <div class="grid" id="rotationGrid"></div>
 
   <div class="section-head">
-    <h2>Bench</h2>
+    <h2>Out</h2>
     <span class="count" id="benchCount"></span>
     <div class="section-rule"></div>
   </div>
@@ -932,7 +932,7 @@ const PLAYERS = [
    styleTag:'Lob Rolling Big', styleTagSource:'markus', shootCat:'BRICK', 
    ht:'6\'10" (208cm)', wt:null,
    avg2:{cs3:'N/A',db3:'N/A',pa3:'24.7%',ft:'51.8%',ftr:'27.5%',orb:'8.4%',ast:'4.6%'},
-   cue:null, notes:[],
+   cue:null, notes:['Target - turtle'],
    quiz:[
       {q:'What\'s Yates\'s shooter designation, per the club scout sheet?', opts:['Shooter','Brick','Sniper'], correct:1}
    ], flagged:false},
@@ -1679,11 +1679,12 @@ document.getElementById('benchCount').textContent = PLAYERS.filter(p=>p.side==='
 const MATCHUPS = [
   {tas:'J. BROWN', bullets:['HINTON','NORTON','MACKINNON']},
   {tas:'SMITH', bullets:['VELICKA','HINTON']},
-  {tas:'J. MCVEIGH', bullets:['MACKINNON','ROUHLIADEFF']},
-  {tas:'LEWIS', bullets:['WILLIAMS','MAYEN','ROUHLIADEFF']},
-  {tas:'PINDER', bullets:['ROUHLIADEFF','HARRISON','HOLT']},
-  {tas:'BOLDEN', bullets:['HARRISON','HOLT','ROUHLIADEFF']},
+  {tas:'LEWIS', bullets:['MACKINNON','WILLIAMS','MAYEN']},
+  {tas:'J. MCVEIGH', bullets:['ROUHLIADEFF','MACKINNON','WILLIAMS']},
+  {tas:'PINDER', bullets:['HARRISON','ROUHLIADEFF','HOLT']},
+  {tas:'BOLDEN', bullets:['HARRISON','HOLT','ROUHLIADEFF','WILLIAMS']},
   {tas:'W. BROWN', bullets:['MACKINNON','MAYEN']},
+  {tas:'NUNN', bullets:['VELICKA','NORTON']},
   // DECH, BRUCE and K. GALLOWAY rows removed 13 Sep 2026 when all three were marked
   // injured/static - matching the existing convention that injured/static players
   // (Paul, J. Galloway) carry no Matchups row. Their real bullets/defenders (Dech and
