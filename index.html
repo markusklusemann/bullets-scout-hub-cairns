@@ -853,8 +853,16 @@ const PLAYERS = [
    quiz:[
       {q:'Per the scout notes, what\'s J. Brown\'s biggest weakness we can attack in the paint?', opts:['Poor decision-making once walled up','Can\'t finish with his left hand','Turns the ball over under ball pressure'], correct:0}
    ], flagged:false},
-  {side:'starter', surname:'DECH', full:'Sunday Dech', num:'44', pos:'SG',
-   styleTag:'Athletic Wing', styleTagSource:'markus', shootCat:'SHOOTER', 
+  {side:'starter', surname:'SMITH', full:'Reyne Smith', num:'21', pos:'SG',
+   styleTag:'Shooting Specialist', styleTagSource:'markus', shootCat:'SNIPER', 
+   ht:'6\'2" (188cm)', wt:null,
+   avg2:{cs3:'38.9%',db3:'25.4%',pa3:'77.0%',ft:'94.2%',ftr:'15.3%',orb:'1.9%',ast:'9.7%'},
+   cue:'MORE OVER', notes:['Lefty shooter with a super-quick release — closeouts need to be on time, every time.','Drives right about 80% of the time — shade him left.'],
+   quiz:[
+      {q:'Smith drives right about 80% of the time. Which way do we shade him?', opts:['Left','Right','No shade needed'], correct:0}
+   ], flagged:false},
+  {side:'bench', surname:'DECH', full:'Sunday Dech', num:'44', pos:'SG', injured:true, static:true,
+   styleTag:'Athletic Wing', styleTagSource:'markus', shootCat:'SHOOTER',
    ht:'6\'5" (195cm)', wt:null,
    avg2:{cs3:'34.9%',db3:'28.0%',pa3:'56.1%',ft:'77.5%',ftr:'14.5%',orb:'4.9%',ast:'7.4%'},
    cue:'MORE UNDER', notes:['Great cutter — must be seen and bumped off his cuts.'],
@@ -885,21 +893,13 @@ const PLAYERS = [
    quiz:[
       {q:'What ball-screen coverage do we start Pinder in as the screener?', opts:['HIGH DROP','ICE','SWITCH'], correct:0}
    ], flagged:false},
-  {side:'rotation', surname:'BRUCE', full:'Shaun Bruce', num:'7', pos:'PG',
-   styleTag:'Backup Point Guard', styleTagSource:'markus', shootCat:'SHOOTER', 
+  {side:'bench', surname:'BRUCE', full:'Shaun Bruce', num:'7', pos:'PG', injured:true, static:true,
+   styleTag:'Backup Point Guard', styleTagSource:'markus', shootCat:'SHOOTER',
    ht:'6\'4" (192cm)', wt:null,
    avg2:{cs3:'32.4%',db3:'33.2%',pa3:'62.3%',ft:'82.2%',ftr:'18.0%',orb:'3.6%',ast:'19.6%'},
    cue:'MORE OVER', notes:['Secondary ballhandler who can also shoot — apply pressure and shade him left.','A poor defender — a target for us to attack.'],
    quiz:[
       {q:'Per the scout notes, what\'s true about Bruce defensively?', opts:['He\'s a poor defender — a target for us','He\'s a lockdown wing defender','He rarely fouls'], correct:0}
-   ], flagged:false},
-  {side:'rotation', surname:'SMITH', full:'Reyne Smith', num:'21', pos:'SG',
-   styleTag:'Shooting Specialist', styleTagSource:'markus', shootCat:'SNIPER', 
-   ht:'6\'2" (188cm)', wt:null,
-   avg2:{cs3:'38.9%',db3:'25.4%',pa3:'77.0%',ft:'94.2%',ftr:'15.3%',orb:'1.9%',ast:'9.7%'},
-   cue:'MORE OVER', notes:['Lefty shooter with a super-quick release — closeouts need to be on time, every time.','Drives right about 80% of the time — shade him left.'],
-   quiz:[
-      {q:'Smith drives right about 80% of the time. Which way do we shade him?', opts:['Left','Right','No shade needed'], correct:0}
    ], flagged:false},
   {side:'rotation', surname:'W. BROWN', full:'Walter Brown', num:'22', pos:'SF',
    styleTag:'Aggressive Wing', styleTagSource:'markus', shootCat:'SHOOTER',
@@ -909,8 +909,8 @@ const PLAYERS = [
    quiz:[
       {q:'What do the scout notes say about defending W. Brown when he drives hard?', opts:['Wall up and make him finish through contact','Force him left','Help off early and double'], correct:0}
    ], flagged:false},
-  {side:'rotation', surname:'K. GALLOWAY', full:'Kyrin Galloway', num:'14', pos:'PF',
-   styleTag:'Shooting Big', styleTagSource:'markus', shootCat:'SHOOTER', 
+  {side:'bench', surname:'K. GALLOWAY', full:'Kyrin Galloway', num:'14', pos:'PF', injured:true, static:true,
+   styleTag:'Shooting Big', styleTagSource:'markus', shootCat:'SHOOTER',
    ht:'6\'8" (203cm)', wt:null,
    avg2:{cs3:'35.4%',db3:'25.9%',pa3:'55.0%',ft:'78.4%',ftr:'16.0%',orb:'4.8%',ast:'6.0%'},
    cue:null, notes:['Mobile pick-and-pop big — peel to him early, don\'t lose him popping.','Force him to finish with his left hand around the rim.'],
@@ -925,7 +925,7 @@ const PLAYERS = [
    quiz:[
       {q:'What\'s Bolden\'s shooter designation, per the club scout sheet?', opts:['Sniper','Shooter','Driver'], correct:1}
    ], flagged:false},
-  {side:'bench', surname:'NUNN', full:'Brody Nunn', num:'5', pos:'SG',
+  {side:'rotation', surname:'NUNN', full:'Brody Nunn', num:'5', pos:'SG',
    styleTag:'Shooting Guard', styleTagSource:'markus', shootCat:'SNIPER', 
    ht:'6\'1" (185cm)', wt:null,
    avg2:{cs3:'39.8%',db3:'30.6%',pa3:'37.4%',ft:'62.5%',ftr:'26.8%',orb:'1.9%',ast:'19.9%'},
@@ -933,7 +933,7 @@ const PLAYERS = [
    quiz:[
       {q:'What\'s our coverage call on a screen for Nunn?', opts:['OVER','UNDER','MORE OVER'], correct:0}
    ], flagged:false},
-  {side:'bench', surname:'L. MCVEIGH', full:'Lloyd McVeigh', num:'11', pos:'SF',
+  {side:'rotation', surname:'L. MCVEIGH', full:'Lloyd McVeigh', num:'11', pos:'SF',
    styleTag:'Driver', styleTagSource:'markus', shootCat:'DRIVER', 
    ht:'6\'5" (196cm)', wt:null,
    avg2:{cs3:'32.4%',db3:'20.9%',pa3:'38.2%',ft:'79.0%',ftr:'35.7%',orb:'4.7%',ast:'2.2%'},
@@ -941,7 +941,7 @@ const PLAYERS = [
    quiz:[
       {q:'What\'s L. McVeigh\'s shooter designation, per the club scout sheet?', opts:['Sniper','Shooter','Driver'], correct:2}
    ], flagged:false},
-  {side:'bench', surname:'YATES', full:'Luca Yates', num:'19', pos:'C',
+  {side:'rotation', surname:'YATES', full:'Luca Yates', num:'19', pos:'C',
    styleTag:'Lob Rolling Big', styleTagSource:'markus', shootCat:'BRICK', 
    ht:'6\'10" (208cm)', wt:null,
    avg2:{cs3:'N/A',db3:'N/A',pa3:'24.7%',ft:'51.8%',ftr:'27.5%',orb:'8.4%',ast:'4.6%'},
@@ -1086,9 +1086,9 @@ const TEAM_OVERVIEW = {
   // tables (offenseRows/defenseRows/mainSets, "what they do"/"how we'll attack it") this
   // replaced are preserved in build-log history if ever wanted back.
   startingDefense: [
-    {situation:'On-Ball Screens', personnel:'1-4', call:'RED', status:'Same'},
-    {situation:'On-Ball Screens', personnel:'5', call:'HIGH DROP', status:'Same'},
-    {situation:'Ready For', personnel:'-', call:'PEEL, RED 1-5', status:'Same'},
+    {situation:'On-Ball Screens', personnel:'1-3', call:'RED', status:'Same'},
+    {situation:'On-Ball Screens', personnel:'4-5', call:'GRAY/HAWK', status:'Same'},
+    {situation:'Ready For', personnel:'-', call:'HIGH DROP, PEEL & RED', status:'Same'},
     {situation:'Off-Ball & DHO', personnel:'All', call:'LET THROUGH', status:'Same'},
     {situation:'Full Court (after makes and deadballs)', personnel:'-', call:'ON', status:'Same'},
     {situation:'Their Main Sets', personnel:'-', call:[
@@ -1147,7 +1147,7 @@ const TEAM_QUIZ = [
   // full-court pressure call) are preserved in the build log if ever wanted back.
   {q:"How do we play Cairns' Off-Ball screens and DHOs?", opts:['LET THROUGH','ICE','SWITCH'], correct:0},
   {q:"Which HC (half-court) set is specifically designed to target the mouse (weakest on-ball defender)?", opts:['Cross, Ram','High 5, High Horns','Away'], correct:0},
-  {q:"What's our coverage on a ball screen set by one of Cairns' 1-4?", opts:['RED','HIGH DROP','PEEL'], correct:0},
+  {q:"What's our coverage on a ball screen set by one of Cairns' 1-3?", opts:['RED','HIGH DROP','GRAY/HAWK'], correct:0},
   {q:"Besides Bruce and J.Brown, who else is a Target for long closeouts or attacking the Mouse?", opts:['Dech','Smith','W. Brown'], correct:1},
   {q:"What coverage for positions 1-5 do we need to be ready for against Pick and Pop?", opts:['Black/Snake','Gray/Hawk','Red/Fox'], correct:2},
 ];
@@ -1695,11 +1695,14 @@ const MATCHUPS = [
   {tas:'J. MCVEIGH', bullets:['MACKINNON','ROUHLIADEFF']},
   {tas:'LEWIS', bullets:['WILLIAMS','MAYEN','ROUHLIADEFF']},
   {tas:'PINDER', bullets:['ROUHLIADEFF','HARRISON','HOLT']},
-  {tas:'K. GALLOWAY', bullets:['ROUHLIADEFF','HARRISON','HOLT']},
   {tas:'BOLDEN', bullets:['HARRISON','HOLT','ROUHLIADEFF']},
   {tas:'W. BROWN', bullets:['MACKINNON','MAYEN']},
-  {tas:'DECH', bullets:['MACKINNON','MAYEN']},
-  {tas:'BRUCE', bullets:['VELICKA','HINTON']},
+  // DECH, BRUCE and K. GALLOWAY rows removed 13 Sep 2026 when all three were marked
+  // injured/static - matching the existing convention that injured/static players
+  // (Paul, J. Galloway) carry no Matchups row. Their real bullets/defenders (Dech and
+  // W. Brown both MACKINNON/MAYEN; Bruce VELICKA/HINTON; K. Galloway ROUHLIADEFF/
+  // HARRISON/HOLT) are preserved above in this file's history if they return to
+  // action and need the row restored.
 ];
 
 // Real Bullets player photos, carried over unchanged from the Tasmania build (they're
@@ -1761,10 +1764,10 @@ renderMatchups();
 // Reuses the same .team-quiz-grid/.team-quiz-card markup and quiz mechanic as Team
 // Recall; does not replicate SEM's later "hide the roster while answering" gate.
 const GAME_SITUATIONS = [
-  {q:"J. Brown is getting an on-ball screen from Pinder. What's our starting coverage, and what do we need to be ready for if Pinder pops?", opts:['Under + High Drop','High Drop + Peel','Red + Black'], correct:1},
+  {q:"J. Brown is getting an on-ball screen from Pinder. What does the ball defender need to do?", opts:['Keep space and Under','Over','Mix it up'], correct:1},
   {q:"McVeigh and Smith run a DHO action on the side of the court. What's our call?", opts:['RED','JAM + UNDER','LET THROUGH'], correct:2},
   {q:"You've successfully closed out on Lewis and taken away his 3pt shot. What will he try to do next?", opts:['Shoot a fadeaway','Drive hard left and finish right','Shoot a pull-up J'], correct:1},
-  {q:"K. Galloway sets a wide screen for Bruce. What should Bruce's defender do, and what does Galloway's defender need to be wary of?", opts:['More Over + Pop','Red + Iso','Trap + Recover'], correct:0},
+  {q:"Yates sets a ball screen for Bruce. What should Bruce's defender do, and what does Yates' defender need to be wary of?", opts:['More Over + Lob','Red + Iso','Always under + Pop'], correct:0},
   {q:"We're on offense and J. Brown switches onto Jaylin, who's in the corner. What advantage do we have?", opts:['A 3 over a short defender','A corner stampede','A ghost with another guard'], correct:1},
 ];
 
