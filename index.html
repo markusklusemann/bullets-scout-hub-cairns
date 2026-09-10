@@ -524,6 +524,19 @@
     padding:6px 12px;border-radius:6px;display:inline-block;margin-bottom:16px;
   }
 
+  /* ---------- "Hide the roster while answering" gate (Game Situations / Team
+     Recall) - copied from the SEM hub's mechanic, 13 Sep 2026. Reuses the existing
+     .locked-state look for the "not started yet" / "still in progress" states; a
+     dedicated green note marks the "all done, unlocked" state so it doesn't read
+     like the gold coach-mode note. Never engages in coach mode (info/roster stays
+     visible; a coach-mode-note explains why instead). */
+  .gate-note-done{
+    font-family:"IBM Plex Mono",monospace;font-size:11.5px;font-weight:600;
+    letter-spacing:.02em;color:#fff;background:#2E8B57;
+    padding:6px 12px;border-radius:6px;display:inline-block;margin-bottom:16px;
+  }
+  #rosterBlock[hidden],#situQuizArea[hidden],#overviewInfoBlock[hidden],#teamQuizArea[hidden]{display:none;}
+
   /* ---------- Summary tab ---------- */
   .summary-stat-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:24px;}
   .summary-stat{background:var(--paper-raised);border:1px solid var(--line);border-radius:10px;padding:16px 22px;min-width:150px;}
@@ -684,6 +697,10 @@
     <div class="hud-badge" id="streakBadge">TAP A CARD TO START</div>
   </div>
 
+  <!-- Roster block (Starters/Rotation/Bench/Matchups) hides while Game Situations is
+       being answered, per the "no looking up the answer" gate copied from the SEM hub
+       (13 Sep 2026) - see situGateOpen()/updateSituGate() below. -->
+  <div id="rosterBlock">
   <div class="section-head">
     <h2>Starters</h2>
     <span class="count" id="starterCount"></span>
@@ -711,6 +728,7 @@
     <div class="section-rule"></div>
   </div>
   <div class="matchup-table" id="matchupTable"></div>
+  </div>
 
   <div class="section-head" style="margin-top:34px;">
     <h2>Game Situations</h2>
@@ -1136,6 +1154,7 @@ const TEAM_QUIZ = [
 
 let teamScored = new Set();
 let teamCorrect = 0;
+let teamRecallStarted = false;
 
 function meterRow(m){
   const pct = Math.max(0, Math.min(100, (m.score/5)*100));
@@ -1231,26 +1250,91 @@ function wireTeamQuiz(){
   });
 }
 
+// Whether Keys to Victory / Actions & Sets are allowed to be visible right now:
+// true once every Team Recall question is answered, or always in coach mode.
+// Mirrors the SEM hub's "hide the info while answering" gate.
+function teamGateOpen(){ return teamScored.size === TEAM_QUIZ.length || coachMode; }
+
 function renderTeamOverview(){
   const el = document.getElementById('teamOverviewBody');
   if(!el) return;
   const sh = TEAM_OVERVIEW.shooting;
   el.innerHTML = `
-    <div class="section-head"><h2>Keys to Victory</h2><div class="section-rule"></div></div>
-    <ul class="kv-list">${TEAM_OVERVIEW.keysToVictory.map(k=>`<li>${k}</li>`).join('')}</ul>
+    <div id="overviewInfoBlock">
+      <div class="section-head"><h2>Keys to Victory</h2><div class="section-rule"></div></div>
+      <ul class="kv-list">${TEAM_OVERVIEW.keysToVictory.map(k=>`<li>${k}</li>`).join('')}</ul>
 
-    <!-- Opponent's Style of Play (meters + Shooting Efficiency & Profile) hidden
-         per Markus's request, 31 Aug 2026. Markup kept commented out, not deleted,
-         in case it's wanted back — nothing here reads live data that would go stale. -->
+      <!-- Opponent's Style of Play (meters + Shooting Efficiency & Profile) hidden
+           per Markus's request, 31 Aug 2026. Markup kept commented out, not deleted,
+           in case it's wanted back — nothing here reads live data that would go stale. -->
 
-    <div class="section-head" style="margin-top:34px;"><h2>Actions &amp; Sets</h2><div class="section-rule"></div></div>
-    ${callSheetTable('Starting Defense', TEAM_OVERVIEW.startingDefense)}
-    ${startingOffenseTable('Starting Offense', TEAM_OVERVIEW.startingOffense)}
+      <div class="section-head" style="margin-top:34px;"><h2>Actions &amp; Sets</h2><div class="section-rule"></div></div>
+      ${callSheetTable('Starting Defense', TEAM_OVERVIEW.startingDefense)}
+      ${startingOffenseTable('Starting Offense', TEAM_OVERVIEW.startingOffense)}
+    </div>
 
     <div class="section-head" style="margin-top:34px;"><h2>Team Recall</h2><span class="count" id="teamRecallCount"></span><div class="section-rule"></div></div>
-    ${teamQuizHTML()}
+    <div id="teamGateArea"></div>
+    <div id="teamQuizArea" hidden></div>
   `;
-  wireTeamQuiz();
+  updateTeamGate();
+}
+
+// Builds the Team Recall quiz into #teamQuizArea on first use only (so answered
+// buttons keep their correct/wrong highlight rather than being wiped on every
+// gate refresh), and swaps #teamGateArea between the "start" prompt, the "in
+// progress, info hidden" note, and the "all done, info unlocked" note. Called
+// after every Team Recall answer (via updateHUD) and on coach-mode unlock.
+function updateTeamGate(){
+  const gateEl = document.getElementById('teamGateArea');
+  const quizEl = document.getElementById('teamQuizArea');
+  const infoEl = document.getElementById('overviewInfoBlock');
+  if(!gateEl || !quizEl || !infoEl) return;
+
+  function buildQuizOnce(){
+    if(quizEl.dataset.built === '1') return;
+    quizEl.innerHTML = teamQuizHTML();
+    wireTeamQuiz();
+    quizEl.dataset.built = '1';
+  }
+
+  if(coachMode){
+    infoEl.hidden = false;
+    quizEl.hidden = false;
+    buildQuizOnce();
+    gateEl.innerHTML = `<div class="coach-mode-note">Coach mode — Keys to Victory and Actions &amp; Sets stay visible while answering Team Recall.</div>`;
+    return;
+  }
+
+  if(!teamRecallStarted){
+    infoEl.hidden = false;
+    quizEl.hidden = true;
+    gateEl.innerHTML = `<div class="locked-state">
+      <span class="lock-icon">&#128274;</span>
+      <div class="lock-title">Ready to test yourself?</div>
+      <div class="lock-sub">Starting this hides Keys to Victory and Actions &amp; Sets above so you can't look up an answer — they reappear automatically once every question below is answered.</div>
+      <button class="coach-pw-btn" id="teamStartBtn" type="button" style="margin-top:14px;">Start Team Recall</button>
+    </div>`;
+    document.getElementById('teamStartBtn').addEventListener('click', ()=>{
+      teamRecallStarted = true;
+      updateTeamGate();
+    });
+    return;
+  }
+
+  quizEl.hidden = false;
+  buildQuizOnce();
+  if(teamGateOpen()){
+    infoEl.hidden = false;
+    gateEl.innerHTML = `<div class="gate-note-done">&#9989; All done — Keys to Victory and Actions &amp; Sets unlocked.</div>`;
+  } else {
+    infoEl.hidden = true;
+    gateEl.innerHTML = `<div class="locked-state">
+      <span class="lock-icon">&#128274;</span>
+      <div class="lock-title">Info hidden — no peeking!</div>
+      <div class="lock-sub">${teamScored.size}/${TEAM_QUIZ.length} answered. It reappears once you finish all of them.</div>
+    </div>`;
+  }
 }
 
 // ---------- Stats Summary ----------
@@ -1686,6 +1770,7 @@ const GAME_SITUATIONS = [
 
 let situScored = new Set();
 let situCorrect = 0;
+let situStarted = false;
 
 function gameSituationsHTML(){
   return `<div class="team-quiz-grid">${GAME_SITUATIONS.map((qz,qi)=>`
@@ -1727,18 +1812,84 @@ function wireGameSituations(){
   });
 }
 
+// Whether the roster (Starters/Rotation/Bench/Matchups) is allowed to be visible
+// right now: true once every Game Situations question is answered, or always in
+// coach mode. Mirrors the SEM hub's "hide the roster while answering" gate.
+function situGateOpen(){ return situScored.size === GAME_SITUATIONS.length || coachMode; }
+
 function renderGameSituations(){
   const el = document.getElementById('gameSituationsBody');
   if(!el) return;
-  el.innerHTML = gameSituationsHTML();
-  wireGameSituations();
+  el.innerHTML = `<div id="situGateArea"></div><div id="situQuizArea" hidden></div>`;
+  updateSituGate();
+}
+
+// Builds the Game Situations quiz into #situQuizArea on first use only (never
+// re-renders it afterwards, so previously-answered buttons keep their
+// correct/wrong highlight instead of being wiped on every gate refresh), and
+// swaps #situGateArea between the "start" prompt, the "in progress, roster
+// hidden" note, and the "all done, roster unlocked" note. Called after every
+// Game Situations answer (via updateHUD) and on coach-mode unlock.
+function updateSituGate(){
+  const gateEl = document.getElementById('situGateArea');
+  const quizEl = document.getElementById('situQuizArea');
+  const rosterEl = document.getElementById('rosterBlock');
+  if(!gateEl || !quizEl || !rosterEl) return;
+
+  function buildQuizOnce(){
+    if(quizEl.dataset.built === '1') return;
+    quizEl.innerHTML = gameSituationsHTML();
+    wireGameSituations();
+    quizEl.dataset.built = '1';
+  }
+
+  if(coachMode){
+    rosterEl.hidden = false;
+    quizEl.hidden = false;
+    buildQuizOnce();
+    gateEl.innerHTML = `<div class="coach-mode-note">Coach mode — roster stays visible while answering Game Situations.</div>`;
+    return;
+  }
+
+  if(!situStarted){
+    rosterEl.hidden = false;
+    quizEl.hidden = true;
+    gateEl.innerHTML = `<div class="locked-state">
+      <span class="lock-icon">&#128274;</span>
+      <div class="lock-title">Ready to test yourself?</div>
+      <div class="lock-sub">Starting this hides the roster above so you can't look up an answer — it reappears automatically once every question below is answered.</div>
+      <button class="coach-pw-btn" id="situStartBtn" type="button" style="margin-top:14px;">Start Game Situations</button>
+    </div>`;
+    document.getElementById('situStartBtn').addEventListener('click', ()=>{
+      situStarted = true;
+      updateSituGate();
+    });
+    return;
+  }
+
+  quizEl.hidden = false;
+  buildQuizOnce();
+  if(situGateOpen()){
+    rosterEl.hidden = false;
+    gateEl.innerHTML = `<div class="gate-note-done">&#9989; All done — roster unlocked.</div>`;
+  } else {
+    rosterEl.hidden = true;
+    gateEl.innerHTML = `<div class="locked-state">
+      <span class="lock-icon">&#128274;</span>
+      <div class="lock-title">Roster hidden — no peeking!</div>
+      <div class="lock-sub">${situScored.size}/${GAME_SITUATIONS.length} answered. It reappears once you finish all of them.</div>
+    </div>`;
+  }
 }
 // NOTE: the call to renderGameSituations() is deliberately placed later in this
 // file (just before renderTeamOverview()), not here - the global, unscoped
 // `document.querySelectorAll('.quiz-opt')` card-quiz handler runs once, further
 // down, and would otherwise double-bind onto these buttons too (their data-sq
 // attribute reads as PLAYERS[undefined], throwing on click). Calling this after
-// that handler has already run avoids the collision entirely.
+// that handler has already run avoids the collision entirely. (With the gate
+// added 13 Sep 2026, the quiz buttons for Game Situations usually don't even
+// exist yet at that point since situStarted starts false - but coach mode
+// builds them immediately on load, so the ordering still matters.)
 
 // Team Overview is shown for Cairns (re-enabled 4 Sep 2026, once the SCOUT PREP CAIRNS
 // doc had real defense/offense scheme content to show) — Tasmania's build keeps this
@@ -1768,6 +1919,9 @@ function updateHUD(){
 
   const situCountEl = document.getElementById('situCount');
   if(situCountEl) situCountEl.textContent = situCorrect+'/'+GAME_SITUATIONS.length+' recalled';
+
+  updateSituGate();
+  updateTeamGate();
 
   renderStatsSummary();
   renderSummary();
