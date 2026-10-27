@@ -1982,7 +1982,7 @@ const TOTAL_QUIZZES = PLAYERS.filter(p=>!p.static).reduce((n,p)=>n+p.quiz.length
 // URL (ends in /exec) into LEADERBOARD_URL; leave it empty to switch the
 // leaderboard off. HUB_ID keeps each game's scores separate in the sheet.
 const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbxJZiYHLRiptqorx6vO_VBickz-NDkTdP6FB6NakthA6ngPreVedUNknBJXYNLdC5iPOQ/exec';
-const HUB_ID = 'CNS-2026';
+const HUB_ID = 'CNS-2026-10-29';  // must be OPPONENT-YYYY-MM-DD or the sheet rejects every score
 // Bullets roster (brisbanebullets.com.au, checked 12 Oct 2026; Mag's #9 confirmed by Alex).
 const SCOUT_ROSTER = [
   '#0 Taine Murray', '#1 Arnas Velicka', '#2 Jaylin Williams', '#3 Max Mackinnon',
@@ -2054,7 +2054,11 @@ function sendScore(){
   const qs = new URLSearchParams(p).toString();
   if(qs === lbLastSent) return;
   lbLastSent = qs;
-  fetch(LEADERBOARD_URL + '?' + qs).then(r=>r.json()).then(()=>{ loadLeaderboard(); }).catch(()=>{ lbLastSent = ''; });
+  lbFetchJSON(LEADERBOARD_URL + '?' + qs).then(d=>{
+    if(d && d.ok === false){ lbSubmitError = lbExplain(d.error); lbLastSent = ''; renderLeaderboard(); }
+    else { lbSubmitError = ''; }
+    loadLeaderboard();
+  }).catch(e=>{ lbLastSent = ''; lbSubmitError = lbExplain(e && e.message); renderLeaderboard(); });
 }
 // Last-chance send if the page closes before the debounce fires.
 window.addEventListener('pagehide', ()=>{
@@ -2065,13 +2069,37 @@ window.addEventListener('pagehide', ()=>{
   try { navigator.sendBeacon(LEADERBOARD_URL, new URLSearchParams(p)); } catch(e) {}
 });
 
+let lbSubmitError = '';
+// fetch + JSON with a 15s timeout so a stalled request can never leave Refresh stuck on "Loading...".
+function lbFetchJSON(url){
+  const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  const timer = setTimeout(()=>{ if(ctrl) ctrl.abort(); }, 15000);
+  return fetch(url, ctrl ? {signal: ctrl.signal} : undefined).then(r=>{
+    if(!r.ok) throw new Error('http_' + r.status);
+    return r.text();
+  }).then(t=>{
+    try { return JSON.parse(t); } catch(e){ throw new Error('not_json'); }
+  }).finally(()=>clearTimeout(timer));
+}
+// Turn a backend / network error code into a plain-English reason shown on the Leaderboard tab.
+function lbExplain(code){
+  const c = String(code || '').toLowerCase();
+  if(/hub/.test(c)) return 'The game ID (' + HUB_ID + ') was not accepted by the leaderboard sheet. Tell Markus.';
+  if(c === 'not_json') return 'The leaderboard link replied with something unexpected (it may need re-deploying). Tell Markus.';
+  if(/^http_/.test(c)) return 'The leaderboard link returned an error (' + c.replace('http_','HTTP ') + '). Tell Markus.';
+  if(/abort/.test(c)) return 'The leaderboard took too long to answer - tap Refresh to try again.';
+  if(c === '' || /fetch|network|failed/.test(c)) return 'Couldn\'t reach the leaderboard - check your connection and tap Refresh.';
+  return 'The leaderboard reported a problem (' + code + ').';
+}
 function loadLeaderboard(){
   if(!lbEnabled() || lbLoading) return;
   lbLoading = true; renderLeaderboard();
-  fetch(LEADERBOARD_URL + '?action=list&hub=' + encodeURIComponent(HUB_ID))
-    .then(r=>r.json())
-    .then(d=>{ lbRows = (d && d.ok && Array.isArray(d.rows)) ? d.rows : []; lbError = (d && d.ok) ? '' : 'Couldn\'t load the leaderboard.'; })
-    .catch(()=>{ lbError = 'Couldn\'t reach the leaderboard - check your connection and tap Refresh.'; })
+  lbFetchJSON(LEADERBOARD_URL + '?action=list&hub=' + encodeURIComponent(HUB_ID))
+    .then(d=>{
+      if(d && d.ok && Array.isArray(d.rows)){ lbRows = d.rows; lbError = ''; }
+      else { lbRows = []; lbError = lbExplain(d && d.error); }
+    })
+    .catch(e=>{ lbError = lbExplain(e && e.message); })
     .finally(()=>{ lbLoading = false; renderLeaderboard(); });
 }
 
@@ -2084,7 +2112,7 @@ function renderLeaderboard(){
       <button type="button" class="lb-link" id="lbChange">${scoutName ? 'Change name' : 'Pick your name'}</button>
       <button type="button" class="lb-link" id="lbRefresh">${lbLoading ? 'Loading…' : 'Refresh'}</button></div>`;
   let body;
-  if(lbError) body = `<div class="lb-note">${escHTML(lbError)}</div>`;
+  if(lbError || lbSubmitError) body = `<div class="lb-note">${escHTML(lbError || lbSubmitError)}</div>`;
   else if(lbRows === null) body = `<div class="lb-note">Loading scores…</div>`;
   else if(lbRows.length === 0) body = `<div class="lb-note">No scores yet - be the first.</div>`;
   else body = `<div class="stats-table-wrap"><table class="stats-table lb-table">
